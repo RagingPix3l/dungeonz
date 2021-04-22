@@ -12,6 +12,7 @@ import {
 } from "../shared/state/States";
 import { addGameEventResponses } from "../network/websocket_events/WebSocketEvents";
 import {
+    GLORY_VALUE,
     HITPOINTS_VALUE, POSITION_VALUE,
 } from "../shared/EventTypes";
 import Panels from "../components/game/gui/panels/PanelsEnum";
@@ -59,7 +60,7 @@ class Game extends Phaser.Scene {
         PlayerState.setDefence(playerData.defence);
         PlayerState.setStats(playerData.stats);
         PlayerState.setTasks(playerData.tasks);
-        InventoryState.items = data.inventory.items;
+        InventoryState.setItems(data.inventory.items);
         InventoryState.setWeight(data.inventory.weight);
         InventoryState.setMaxWeight(data.inventory.maxWeight);
         BankState.items = data.bank.items;
@@ -269,12 +270,22 @@ class Game extends Phaser.Scene {
          */
         this.subs = [
             PubSub.subscribe(HITPOINTS_VALUE, (msg, data) => {
+                // If they were damaged, play a hit sound.
+                if (data.old > data.new) {
+                    dungeonz.gameScene.sound.play("falling-hit-on-gravel", { volume: GUIState.effectsVolume / 100 });
+                }
                 // If the player is now dead, play the death music.
                 if (data.new <= 0) {
                     this.soundManager.music.changeBackgroundMusic(
                         this.soundManager.music.sounds.deathLoop,
                     );
                 }
+            }),
+            PubSub.subscribe(GLORY_VALUE, (msg, data) => {
+                // Show how much glory was gained or lost.
+                this.dynamics[PlayerState.entityID].spriteContainer.onGloryModified(
+                    data.new - data.old,
+                );
             }),
             PubSub.subscribe(POSITION_VALUE, (msg, data) => {
                 // Check the music to play.
@@ -426,7 +437,6 @@ class Game extends Phaser.Scene {
             }
             // Do a melee attack.
             else {
-                dungeonz.gameScene.sound.play("punch-1", { volume: GUIState.effectsVolume / 100 });
                 ApplicationState.connection.sendEvent("melee_attack", direction);
             }
         }
@@ -699,10 +709,9 @@ class Game extends Phaser.Scene {
      * @param {Number} data.col
      */
     addDynamic(data) {
-        const { id } = data;
-        const { typeNumber } = data;
-        const { row } = data;
-        const { col } = data;
+        const {
+            id, typeNumber, row, col,
+        } = data;
 
         // console.log("adding dynamic entity type:", typeNumber, "at row:", row, ", col:", col, ", config:", data);
 

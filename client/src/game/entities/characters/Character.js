@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import gameConfig from "../../../shared/GameConfig";
 import dungeonz from "../../../shared/Global";
+import { GUIState, PlayerState } from "../../../shared/state/States";
 import Utils from "../../../shared/Utils";
 import Container from "../Container";
 
@@ -44,8 +45,6 @@ class Character extends Container {
         this.add(this.enchantmentIcon);
         this.enchantmentIcon.visible = false;
 
-        this.addDamageMarker();
-
         this.baseSprite.on("animationcomplete", this.moveAnimCompleted, this);
 
         this.baseSprite.setInteractive();
@@ -63,6 +62,21 @@ class Character extends Container {
             this.y,
             Phaser.Math.Between(15, 25),
         );
+
+        const { dynamics } = dungeonz.gameScene;
+
+        const playerDynamic = dynamics[PlayerState.entityID];
+        const thisDynamic = dynamics[this.entityId];
+
+        // Check they are both still in the dynamics list.
+        if (playerDynamic && thisDynamic) {
+            // If they are close enough to the player, play a death splat sound.
+            if (Utils.tileDistanceBetween(
+                dynamics[PlayerState.entityID], dynamics[this.entityId],
+            ) <= 5) {
+                dungeonz.gameScene.sound.play("sword-cutting-flesh", { volume: GUIState.effectsVolume / 100 });
+            }
+        }
     }
 
     setDirection(direction) {

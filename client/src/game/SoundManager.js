@@ -107,8 +107,13 @@ class Effects {
             used: {
                 // Add what ever kinds of sounds you want a particular item to play when used.
                 // Should also be defined in the server item config in Items.yml.
+                Scroll: this.addSound(state.sound.add("fast-magic-spell")),
                 // "Food": // TODO: Add food consumed sound here
-                // "Drink": // TODO: Add drink consumed sound here
+                Drink: this.addSound(state.sound.add("magical-potion-drink")),
+                Bow: [
+                    this.addSound(state.sound.add("arrow-shot-1")),
+                    this.addSound(state.sound.add("arrow-shot-2")),
+                ],
             },
         };
 
@@ -157,7 +162,13 @@ class Effects {
 
         // Play the specific sound for the sound type of this item if one is defined.
         if (itemType && itemType.soundType && scope[itemType.soundType]) {
-            scope[itemType.soundType].play();
+            // Play a random sound from the list if there are multiple.
+            if (Array.isArray(scope[itemType.soundType])) {
+                Utils.getRandomElement(scope[itemType.soundType]).play();
+            }
+            else {
+                scope[itemType.soundType].play();
+            }
         }
         else if (scope.default) { // No specific sound set. Use the generic/default one, if it is set.
             scope.default.play();

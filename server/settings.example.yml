@@ -92,10 +92,12 @@ ADDITIONAL_MAX_BANK_WEIGHT_PER_UPGRADE: 50
 # 1650 * 2 = 3300
 MAX_BANK_WEIGHT_UPGRADE_COST_MULTIPLIER: 4
 
-STARTER_BANK_ITEMS:
+STARTER_INVENTORY_ITEMS:
+  - itemName: IronSword
   - itemName: HealthPotion
     quantity: 4
-  - itemName: IronSword
+
+STARTER_BANK_ITEMS:
   - itemName: IronHatchet
   - itemName: IronPickaxe
 
@@ -124,4 +126,4 @@ CHAT_SCOPES:
 MAX_CHAT_MESSAGE_LENGTH: 255
 
 # How many seconds after receiving damage player in combat flag is true
-IN_COMBAT_STATUS_DURATION: 5000
+IN_COMBAT_STATUS_DURATION: 15000
